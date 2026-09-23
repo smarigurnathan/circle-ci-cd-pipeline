@@ -1,0 +1,36 @@
+version: 2.1
+
+jobs:
+  build-and-push:
+    docker:
+      - image: cimg/base:current
+
+    steps:
+      - checkout
+
+      - setup_remote_docker
+
+      - run:
+          name: Build Docker image
+          command: |
+            docker build -t $DOCKERHUB_USERNAME/supermario:latest .
+
+      - run:
+          name: Login to Docker Hub
+          command: |
+            echo "$DOCKERHUB_PASSWORD" | docker login \
+              -u "$DOCKERHUB_USERNAME" \
+              --password-stdin
+
+      - run:
+          name: Push Docker image
+          command: |
+            docker push $DOCKERHUB_USERNAME/supermario:latest
+
+workflows:
+  build-and-push:
+    jobs:
+      - build-and-push:
+          filters:
+            branches:
+              only: main
